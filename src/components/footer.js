@@ -1,5 +1,11 @@
-export  {renderFooter}
+export { renderFooter };
 
 function renderFooter() {
-    return `<h1>FOOTER</h1>`;
+  return `<nav class="navbar bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">
+      Footer projecte
+    </a>
+  </div>
+</nav>`;
 }

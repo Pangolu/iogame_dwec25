@@ -1,11 +1,23 @@
-import './style.scss'
-// eslint-disable-next-line
-import * as bootstrap from 'bootstrap';
-import { renderHeader } from './components/header'
-import {renderFooter} from './components/footer'
-import {renderContent} from './components/content'
+import "./style.scss";
 
+import * as bootstrap from "bootstrap";
+import { renderNav } from "./components/header";
+import { renderFooter } from "./components/footer";
+import { renderContent } from "./components/content";
 
 document.addEventListener("DOMContentLoaded", () => {
-     renderHeader();
-})
+  const navContainer = document.querySelector("nav");
+  if (navContainer) {
+    navContainer.innerHTML = renderNav();
+  }
+
+  const mainContainer = document.querySelector("main");
+  if (mainContainer) {
+    mainContainer.innerHTML = renderContent();
+  }
+
+  const footerContainer = document.querySelector("footer");
+  if (footerContainer) {
+    footerContainer.innerHTML = renderFooter();
+  }
+});
