@@ -9,29 +9,41 @@ function construirArray(numero) {
 }
 
 function renderContent() {
+  const contenidorContent = document.createElement("div");
   const numeroCaselles = `<label for="num-caselles">Numero de caselles</label>
   <input type="text" id="num-caselles" name="num-caselles" placeholder="0"/>
-  <button type= "button">Seleccionar</button>
+  <button type="button" id="boto-entrada">Seleccionar</button>
+  <div id="contenidor-tauler"></div>
   `;
-  const numeroEscollit = document.querySelector("#num-caselles").value;
-  //Creem array plena de numeros amb la posicio que ocupen
-  const arrayCaselles = construirArray(numeroEscollit);
-  let casellesHtml = "";
-  arrayCaselles.forEach((index) => {
-    casellesHtml += `<div class="celda" data-posicio="${index}">
+  contenidorContent.innerHTML = numeroCaselles;
+
+  const entrada = contenidorContent.querySelector("#num-caselles");
+  const botoEntrada = contenidorContent.querySelector("#boto-entrada");
+  const contenidorTauler = contenidorContent.querySelector("#contenidor-tauler");
+
+  botoEntrada.addEventListener("click", () => {
+    const valor = parseInt(entrada.value);
+    const arrayCaselles = construirArray(valor);
+    let casellesHtml = "";
+    arrayCaselles.forEach((index) => {
+      casellesHtml += `<div class="celda" data-posicio="${index}">
     ${index}
     </div>
     `;
-  });
-  //Ara ja tenim l'HTML amb totes les caselles
-  //Afegim al HTML
-  const contenidorTauler = `
-  <div class="contenidor-tauler">
-    <div class="casella">
+    });
+    contenidorTauler.innerHTML = `
+
+    <div id="tauler">
     ${casellesHtml}
     </div>
-  </div>
-  `;
 
-  return numeroCaselles + contenidorTauler;
+  `;
+  })
+
+  //Creem array plena de numeros amb la posicio que ocupen
+
+  //Ara ja tenim l'HTML amb totes les caselles
+  //Afegim al HTML
+
+  return contenidorContent;
 }

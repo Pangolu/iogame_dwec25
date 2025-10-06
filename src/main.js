@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const mainContainer = document.querySelector("main");
   if (mainContainer) {
-    mainContainer.innerHTML = renderContent();
+    mainContainer.append(renderContent());
   }
 
   const footerContainer = document.querySelector("footer");
