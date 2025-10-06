@@ -10,40 +10,53 @@ function construirArray(numero) {
 
 function renderContent() {
   const contenidorContent = document.createElement("div");
-  const numeroCaselles = `<label for="num-caselles">Numero de caselles</label>
-  <input type="text" id="num-caselles" name="num-caselles" placeholder="0"/>
-  <button type="button" id="boto-entrada">Seleccionar</button>
-  <div id="contenidor-tauler"></div>
+  contenidorContent.id = "contingut";
+  const numeroCaselles = `<div id="seleccio-mida-tauler">
+  <button type="button" class="seleccio-grandaria" id="boto-entrada-25" value="5">5 x 5</button>
+  <button type="button" class="seleccio-grandaria" id="boto-entrada-36" value="6">6 x 6</button>
+  <button type="button" class="seleccio-grandaria" id="boto-entrada-49" value="7">7 x 7</button>
   `;
-  contenidorContent.innerHTML = numeroCaselles;
 
-  const entrada = contenidorContent.querySelector("#num-caselles");
-  const botoEntrada = contenidorContent.querySelector("#boto-entrada");
-  const contenidorTauler = contenidorContent.querySelector("#contenidor-tauler");
+  const colocarMida = document.createElement("div");
+  colocarMida.innerHTML = numeroCaselles;
+  contenidorContent.append(colocarMida);
 
-  botoEntrada.addEventListener("click", () => {
-    const valor = parseInt(entrada.value);
-    const arrayCaselles = construirArray(valor);
-    let casellesHtml = "";
-    arrayCaselles.forEach((index) => {
-      casellesHtml += `<div class="celda" data-posicio="${index}">
-    ${index}
-    </div>
-    `;
+  const botonsMida = contenidorContent.querySelectorAll(".seleccio-grandaria");
+  const contenidorTauler = document.createElement("div");
+  contenidorTauler.id = "contenidor-tauler";
+
+  botonsMida.forEach((e) => {
+    e.addEventListener("click", () => {
+      console.log("1");
+      const mida = parseInt(e.value);
+      const arrayCaselles = construirArray(mida * mida);
+      let filesHtml = "";
+      let casella = 0;
+      for (let i = 0; i < mida; i++) {
+        filesHtml += `<div class="files-tauler">`;
+        for (let j = 0; j < mida; j++) {
+          filesHtml += `<div class="celda" data-posicio="${casella}">
+        ${casella}
+        </div>
+        `;
+          casella++;
+        }
+        filesHtml += `</div>`;
+      }
+      /*         arrayCaselles.forEach((index) => {
+          console.log("2");
+          filesHtml += `<div class="celda" data-posicio="${index}">
+        ${index}
+        </div>*/
+
+      console.log("3");
+      contenidorTauler.innerHTML = `
+        <div id="tauler">
+        ${filesHtml}
+        </div>
+        `;
     });
-    contenidorTauler.innerHTML = `
-
-    <div id="tauler">
-    ${casellesHtml}
-    </div>
-
-  `;
-  })
-
-  //Creem array plena de numeros amb la posicio que ocupen
-
-  //Ara ja tenim l'HTML amb totes les caselles
-  //Afegim al HTML
-
+  });
+  contenidorContent.append(contenidorTauler);
   return contenidorContent;
 }
