@@ -1,32 +1,57 @@
 export { renderContent };
 
-function construirArray(numero) {
-  const array = [];
+//CONSTRUIM L'ARRAY
+function construirArrayTauler(numero) {
+
+  const arrayTauler = [];
   for (let i = 0; i < numero; i++) {
-    array.push(i);
+    const fila = []
+    for (let j = 0; j < numero; j++) {
+
+      fila.push({
+        valor: 0,
+        color: "white"//colorAleatori
+      });
+    }
+    arrayTauler.push(fila);
   }
-  return array;
+  return arrayTauler;
 }
 
-function crearTauler(mida){
+//CREEM EL TAULER PER POSAR-LO AL DOM
+function crearTauler(mida, arrayCaselles) {
   let filesHtml = "";
-let casella = 0;
   for (let i = 0; i < mida; i++) {
     filesHtml += `<div class="files-tauler">`;
     for (let j = 0; j < mida; j++) {
-      filesHtml += `<div class="celda" data-posicio="${casella}">
-        ${casella}
+      const { valor, color } = arrayCaselles[i][j];
+      filesHtml += `<div class="celda" data-fila="${i}" data-columna="${j}" style="background-color: ${color};">
+        ${valor}
         </div>
         `;
-      casella++;
     }
     filesHtml += `</div>`;
   }
-return filesHtml;
+  return filesHtml;
+}
+
+function actualitzarTauler(contenidor, arrayCaselles){
+  const mida = arrayCaselles.length;
+  let filesHtml = "";
+  for (let i = 0; i < mida; i++){
+    filesHtml += `<div class="files-tauler">`;
+    for (let j = 0; j < mida; j++){
+      const { valor, color } = arrayCaselles[i][j];
+      filesHtml += `<div class="celda" data-fila="${i}" data-columna="${j}" style="background-color: ${color};">
+      ${valor}
+      </div>`;
+    }
+    filesHtml += `</div>`;
+  }
+  contenidor.innerHTML = `<div id="tauler">${filesHtml}</div>`;
 }
 
 function renderContent() {
-
 
   const contenidorContent = document.createElement("div");
   contenidorContent.id = "contingut";
@@ -35,6 +60,7 @@ function renderContent() {
   <button type="button" class="seleccio-grandaria" id="boto-entrada-36" value="6">6 x 6</button>
   <button type="button" class="seleccio-grandaria" id="boto-entrada-49" value="7">7 x 7</button>
   <button type="button" class="inici" id="boto-inici">Inici</button>
+  </div>
   `;
 
   const colocarMida = document.createElement("div");
@@ -44,21 +70,20 @@ function renderContent() {
   const botonsMida = contenidorContent.querySelectorAll(".seleccio-grandaria");
   const contenidorTauler = document.createElement("div");
   contenidorTauler.id = "contenidor-tauler";
-  let filesHtml = crearTauler(5);
-  
-  contenidorTauler.innerHTML = `
-        <div id="tauler">
-        ${filesHtml}
-        </div>
-        `;
+
+  let estatCaselles;
+
+  const botoInici = contenidorContent.querySelector("#boto-inici");
+ 
+  //SELECCIONEM LA MIDA DEL TAULER
   botonsMida.forEach((e) => {
     e.addEventListener("click", () => {
-      console.log("1");
+      botoInici.disabled = false;
       const mida = parseInt(e.value);
-      
-      let filesHtml = crearTauler(mida);
+      estatCaselles = construirArrayTauler(mida);
 
-      console.log("3");
+      let filesHtml = crearTauler(mida, estatCaselles);
+
       contenidorTauler.innerHTML = `
         <div id="tauler">
         ${filesHtml}
@@ -66,7 +91,52 @@ function renderContent() {
         `;
     });
   });
-  const arrayCaselles = construirArray();
+
+  const colors = ["magenta", "cyan", "yellow"];
+
+  //COMENÇA LA PARTIDA, EL BOTO DE INICI QUEDA DESACTIVAT PERA QUE NO ES PUGA GENERAR UN ALTRE QUADRAT  
+  botoInici.addEventListener("click", () => {
+    if (!estatCaselles) return;
+
+    botoInici.disabled = true;
+    const mida = estatCaselles.length;
+    const columna = Math.floor(Math.random() * estatCaselles[0].length);
+    const colorAleatori = colors[Math.floor(Math.random() * colors.length)];
+
+    let filaActual = 0;
+    estatCaselles[0][columna] = {
+      valor: 1,
+      color: colorAleatori
+    }
+
+    actualitzarTauler(contenidorTauler, estatCaselles);
+
+    const intervalId = setInterval(() => {
+      if (filaActual === mida - 1 || estatCaselles[filaActual + 1][columna].valor != 0){
+        clearInterval(intervalId);
+        return;
+      }
+
+      estatCaselles[filaActual + 1][columna] = estatCaselles[filaActual][columna];
+      estatCaselles[filaActual][columna] = { valor: 0, color: "white"};
+
+      filaActual++;
+      actualitzarTauler(contenidorTauler, estatCaselles);
+    }, 500);
+
+    /*
+    const celda = contenidorTauler.querySelector(
+      `.celda[data-fila='${0}'][data-columna='${columna}']`
+    );
+    celda.style.backgroundColor = colorAleatori;
+    celda.textContent = 1;
+*/
+    
+  });
+
+
+
+
   contenidorContent.append(contenidorTauler);
   return contenidorContent;
 }
