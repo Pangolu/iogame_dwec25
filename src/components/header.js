@@ -7,16 +7,16 @@ export function renderNav() {
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item active">
-        <a class="nav-link" href="#">JoC <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="#joc">Joc <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Rankin</a>
+        <a class="nav-link" href="#ranking">Ranking</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="#">Pricing</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="#">Disabled</a>
+        <a class="nav-link" href="#registre">Registre</a>
       </li>
     </ul>
   </div>
