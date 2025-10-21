@@ -1,5 +1,9 @@
 @import "bootstrap/scss/bootstrap";
 
+body{
+  background-color: #212529;
+}
+
 .celda {
 
   display: flex;
@@ -30,3 +34,4 @@
   justify-content: center;
   margin: 1em;
 }
+

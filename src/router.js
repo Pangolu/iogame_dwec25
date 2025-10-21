@@ -1,14 +1,16 @@
-import {rendercontent} from "./components/content";
-import {renderfooter} from "./components/footer";
-import {renderheader} from "./components/header";
-import {registre} from "./components/register";
-export {router};
+import { renderContent } from "./components/content";
+import { renderLogin } from "./components/login";
+import { renderRegistre } from "./components/register";
+
+export {router}
 
 const routes = new Map([
-    ['#', rendercontent],
-    ['#joc', rendercontent],
-    ['#registre', registre]
-]);
+    ['',renderContent],
+    ['#game',renderContent],
+    ['#login',renderLogin],
+    ['#registre', renderRegistre]
+])
+
 
 function router(route,container){
     if(routes.has(route)){

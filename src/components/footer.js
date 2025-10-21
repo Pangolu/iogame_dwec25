@@ -1,11 +1,16 @@
 export { renderFooter };
 
 function renderFooter() {
-  return `<nav class="navbar bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">
-      Footer projecte
-    </a>
+  const text = `<footer class="bg-dark text-white text-center text-lg-start">
+  <!-- Copyright -->
+  <div class="text-center p-3">
+    © 2025 Copyright:
+    <a class="text-blue" href="">Pangolu</a>
   </div>
-</nav>`;
+  <!-- Copyright -->
+</footer>`;
+const div = document.createElement("div");
+div.innerHTML = text;
+  
+  return div;
 }
