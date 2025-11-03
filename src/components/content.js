@@ -35,12 +35,12 @@ function crearTauler(mida, arrayCaselles) {
   return filesHtml;
 }
 
-function actualitzarTauler(contenidor, arrayCaselles){
+function actualitzarTauler(contenidor, arrayCaselles) {
   const mida = arrayCaselles.length;
   let filesHtml = "";
-  for (let i = 0; i < mida; i++){
+  for (let i = 0; i < mida; i++) {
     filesHtml += `<div class="files-tauler">`;
-    for (let j = 0; j < mida; j++){
+    for (let j = 0; j < mida; j++) {
       const { valor, color } = arrayCaselles[i][j];
       filesHtml += `<div class="celda" data-fila="${i}" data-columna="${j}" style="background-color: ${color};">
       ${valor}
@@ -74,7 +74,7 @@ function renderContent() {
   let estatCaselles;
 
   const botoInici = contenidorContent.querySelector("#boto-inici");
- 
+
   //SELECCIONEM LA MIDA DEL TAULER
   botonsMida.forEach((e) => {
     e.addEventListener("click", () => {
@@ -100,42 +100,63 @@ function renderContent() {
 
     botoInici.disabled = true;
     const mida = estatCaselles.length;
-    const columna = Math.floor(Math.random() * estatCaselles[0].length);
-    const colorAleatori = colors[Math.floor(Math.random() * colors.length)];
 
-    let filaActual = 0;
-    estatCaselles[0][columna] = {
-      valor: 1,
-      color: colorAleatori
-    }
+    function generarFitxaNova() {
+      let columna = Math.floor(Math.random() * estatCaselles[0].length);
+      const colorAleatori = colors[Math.floor(Math.random() * colors.length)];
+      let filaActual = 0;
 
-    actualitzarTauler(contenidorTauler, estatCaselles);
+      estatCaselles[0][columna] = {
+        valor: 1,
+        color: colorAleatori
+      };
 
-    const intervalId = setInterval(() => {
-      if (filaActual === mida - 1 || estatCaselles[filaActual + 1][columna].valor != 0){
-        clearInterval(intervalId);
-        return;
+      actualitzarTauler(contenidorTauler, estatCaselles);
+
+      function moureFitxa(e) {
+
+        if (filaActual === mida - 1 || estatCaselles[filaActual + 1][columna].valor !== 0) return;
+
+        if (e.key === "ArrowLeft" && columna > 0 && estatCaselles[filaActual][columna - 1].valor === 0) {
+          estatCaselles[filaActual][columna - 1] = estatCaselles[filaActual][columna];
+          estatCaselles[filaActual][columna] = { valor: 0, color: "white" };
+          columna--;
+          actualitzarTauler(contenidorTauler, estatCaselles);
+        }
+        if (e.key === "ArrowRight" && columna < estatCaselles[0].length - 1 && estatCaselles[filaActual][columna + 1].valor === 0) {
+          // Mover a la derecha
+          estatCaselles[filaActual][columna + 1] = estatCaselles[filaActual][columna];
+          estatCaselles[filaActual][columna] = { valor: 0, color: "white" };
+          columna++;
+          actualitzarTauler(contenidorTauler, estatCaselles);
+        }
       }
 
-      estatCaselles[filaActual + 1][columna] = estatCaselles[filaActual][columna];
-      estatCaselles[filaActual][columna] = { valor: 0, color: "white"};
+      document.addEventListener("keydown", moureFitxa);
 
-      filaActual++;
-      actualitzarTauler(contenidorTauler, estatCaselles);
-    }, 500);
+      const intervalId = setInterval(() => {
 
-    /*
-    const celda = contenidorTauler.querySelector(
-      `.celda[data-fila='${0}'][data-columna='${columna}']`
-    );
-    celda.style.backgroundColor = colorAleatori;
-    celda.textContent = 1;
-*/
-    
+        if (
+          filaActual === mida - 1 ||
+          estatCaselles[filaActual + 1][columna].valor !== 0
+        ) {
+          clearInterval(intervalId);
+
+          setTimeout(() => {
+            generarFitxaNova();
+          }, 500);
+
+          return;
+        }
+        estatCaselles[filaActual + 1][columna] = estatCaselles[filaActual][columna];
+        estatCaselles[filaActual][columna] = { valor: 0, color: "white" };
+
+        filaActual++;
+        actualitzarTauler(contenidorTauler, estatCaselles);
+      }, 500);
+    }
+    generarFitxaNova();
   });
-
-
-
 
   contenidorContent.append(contenidorTauler);
   return contenidorContent;
