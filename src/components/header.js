@@ -18,22 +18,21 @@ export function renderNav() {
       </li>
     </ul>
   `;
-    // 🎨 Colores primarios posibles (Bootstrap)
+
   const primaryColors = ["#0d6efd", "#dc3545", "#198754", "#ffc107", "#6610f2"];
 
-  // 🖱️ Añadir eventos a cada enlace
   const links = nav.querySelectorAll(".nav-link");
 
-links.forEach(link => {
-  link.addEventListener("mouseenter", () => {
-    const randomColor = primaryColors[Math.floor(Math.random() * primaryColors.length)];
-    link.style.setProperty("color", randomColor, "important");
+  links.forEach(link => {
+    link.addEventListener("mouseenter", () => {
+      const randomColor = primaryColors[Math.floor(Math.random() * primaryColors.length)];
+      link.style.setProperty("color", randomColor, "important");
+    });
+
+    link.addEventListener("mouseleave", () => {
+      link.style.setProperty("color", "white", "important");
+    });
   });
 
-  link.addEventListener("mouseleave", () => {
-    link.style.setProperty("color", "white", "important");
-  });
-});
-  
   return nav;
 }

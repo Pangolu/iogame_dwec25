@@ -53,6 +53,34 @@ function renderRegistre() {
   </div>
 </section>`;
 
+//boto
+const SUPABASE_KEY = "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrbWhtaGhhaXN1cWp6YmxhdWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5MDg5NDksImV4cCI6MjA3NjQ4NDk0OX0.fyHk2DNUelf5D2Wu7CAvHafyGkHmy1oC9towPO9b3mI"
+  const signupBtn = document.querySelector("#signupBtn");
+  signupBtn.addEventListener("click", async () => {
+    let signUpObject = {
+      email: document.querySelector("#signupEmail").value.trim(),
+      password: document.querySelector("#signupPwd").value.trim(),
+    };
+
+    console.log(signUpObject.email);
+    console.log(signUpObject.pwd);
+    let response = await fetch(
+      "https://ikmhmhhaisuqjzblauiu.supabase.co/auth/v1/signup",
+      {
+        method: "post",
+        headers: {
+          apiKey: SUPABASE_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(signUpObject),
+      }
+    );
+    let data = await response.json();
+    document.querySelector("#userInfo").innerHTML = JSON.stringify(data);
+    // let access_token = data.access_token;
+    // console.log(access_token);
+  });
+  //! conexion login y registro supabase END
   const div = document.createElement('div')
   div.innerHTML = text;
   return div;
