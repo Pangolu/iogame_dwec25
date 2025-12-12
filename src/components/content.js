@@ -91,58 +91,60 @@ function aplicarGravedad(estatCaselles) {
   }
 }
 
-// Detección y eliminación de tríos iguales (horizontal y vertical).
-// Si encuentra al menos un trío, los elimina (los pone a blanco) y devuelve true.
-// Esta función elimina TODOS los tríos detectados en un barrido (no solo 1).
+// Detecció i eliminació de grups de 3 o més fitxes del mateix color que es toquen.
+// Utilitza un algoritme de flood-fill per trobar grups connectats.
+// Retorna un objecte amb {fitxesEliminades, colorEliminat}
 function eliminarTriosIguales(estatCaselles) {
   const mida = estatCaselles.length;
-  // marcar celdas a eliminar
-  const aEliminar = Array.from({ length: mida }, () => Array(mida).fill(false));
-  let found = false;
+  const visitat = Array.from({ length: mida }, () => Array(mida).fill(false));
+  const grups = [];
 
-  // horizontal
-  for (let i = 0; i < mida; i++) {
-    for (let j = 0; j <= mida - 3; j++) {
-      const c1 = estatCaselles[i][j];
-      const c2 = estatCaselles[i][j + 1];
-      const c3 = estatCaselles[i][j + 2];
-      if (c1.valor !== 0 && c1.color === c2.color && c2.color === c3.color) {
-        // solo considerar colores no-white
-        if (c1.color && c1.color !== "white") {
-          aEliminar[i][j] = aEliminar[i][j + 1] = aEliminar[i][j + 2] = true;
-          found = true;
-        }
-      }
-    }
+  // Trobar tots els grups connectats del mateix color
+  function floodFill(fila, col, color, grup) {
+    if (fila < 0 || fila >= mida || col < 0 || col >= mida) return;
+    if (visitat[fila][col]) return;
+    if (estatCaselles[fila][col].valor === 0) return;
+    if (estatCaselles[fila][col].color !== color) return;
+
+    visitat[fila][col] = true;
+    grup.push({ fila, col });
+
+    // Comprovar les 4 direccions (dalt, baix, esquerra, dreta)
+    floodFill(fila - 1, col, color, grup);
+    floodFill(fila + 1, col, color, grup);
+    floodFill(fila, col - 1, color, grup);
+    floodFill(fila, col + 1, color, grup);
   }
 
-  // vertical
-  for (let j = 0; j < mida; j++) {
-    for (let i = 0; i <= mida - 3; i++) {
-      const c1 = estatCaselles[i][j];
-      const c2 = estatCaselles[i + 1][j];
-      const c3 = estatCaselles[i + 2][j];
-      if (c1.valor !== 0 && c1.color === c2.color && c2.color === c3.color) {
-        if (c1.color && c1.color !== "white") {
-          aEliminar[i][j] = aEliminar[i + 1][j] = aEliminar[i + 2][j] = true;
-          found = true;
-        }
-      }
-    }
-  }
-
-  if (!found) return false;
-
-  // eliminar marcadas
+  // Buscar tots els grups
   for (let i = 0; i < mida; i++) {
     for (let j = 0; j < mida; j++) {
-      if (aEliminar[i][j]) {
-        estatCaselles[i][j] = { valor: 0, color: "white" };
+      const cell = estatCaselles[i][j];
+      if (cell.valor !== 0 && cell.color !== "white" && !visitat[i][j]) {
+        const grup = [];
+        floodFill(i, j, cell.color, grup);
+        if (grup.length >= 3) {
+          grups.push({ color: cell.color, fitxes: grup });
+        }
       }
     }
   }
 
-  return true;
+  if (grups.length === 0) return { fitxesEliminades: 0, colorEliminat: null };
+
+  // Eliminar els grups trobats
+  let totalFitxesEliminades = 0;
+  let colorEliminat = null;
+  
+  for (const grup of grups) {
+    colorEliminat = grup.color; // Guardem el color eliminat per calcular punts
+    for (const { fila, col } of grup.fitxes) {
+      estatCaselles[fila][col] = { valor: 0, color: "white" };
+      totalFitxesEliminades++;
+    }
+  }
+
+  return { fitxesEliminades: totalFitxesEliminades, colorEliminat };
 }
 
 // Gestionar tríada negra específica (violet + green + red).
@@ -194,15 +196,17 @@ function gestionarTriadaNegraSiCorrespon(estatCaselles, fila, col) {
   return false;
 }
 
-// Ejecuta cascada de fusiones y eliminaciones hasta estabilizar:
-// - Intentar merges binarios (primarios distintos → secundario) entre celdas asentadas
-//   (horizontal y vertical) respetando la posición de la "primera" ficha.
-// - Luego, intentar formar la tríada negra en posiciones centrales afectadas.
-// - Luego, eliminar tríos iguales (C: las 3 desaparecen).
-// Repite aplicarGravedad + estos pasos hasta que no ocurra nada.
+// Executa cascada de fusions i eliminacions fins estabilitzar:
+// - Intentar merges binaris (primaris diferents → secundari) entre cel·les assentades
+//   (horitzontal i vertical) respectant la posició de la "primera" fitxa.
+// - Després, intentar formar la tríada negra en posicions centrals afectades.
+// - Després, eliminar trios iguals (C: les 3 desapareixen).
+// Repeteix aplicarGravedad + aquests passos fins que no passi res.
+// Retorna els punts guanyats: +4 per combinació, +8 per negra, -3 per trio eliminat
 function estabilizarBoard(estatCaselles) {
   const mida = estatCaselles.length;
   let changed = true;
+  let puntsGuanyats = 0;
 
   while (changed) {
     changed = false;
@@ -226,9 +230,10 @@ function estabilizarBoard(estatCaselles) {
           if (primarios.includes(abajo.color) && abajo.color !== cell.color) {
             const nuevo = combinarColors(cell.color, abajo.color);
             if (nuevo) {
-              // resultado en la posición inferior (porque ya estaba)
+              // resultat en la posició inferior (perquè ja estava)
               estatCaselles[i + 1][j] = { valor: 1, color: nuevo };
               estatCaselles[i][j] = { valor: 0, color: "white" };
+              puntsGuanyats += 4; // +4 punts per combinació
               mergedThisPass = true;
               changed = true;
               break outerLoop;
@@ -244,6 +249,7 @@ function estabilizarBoard(estatCaselles) {
             if (nuevo) {
               estatCaselles[i][j] = { valor: 1, color: nuevo };
               estatCaselles[i][j + 1] = { valor: 0, color: "white" };
+              puntsGuanyats += 4; // +4 punts per combinació
               mergedThisPass = true;
               changed = true;
               break outerLoop;
@@ -259,6 +265,7 @@ function estabilizarBoard(estatCaselles) {
             if (nuevo) {
               estatCaselles[i][j - 1] = { valor: 1, color: nuevo };
               estatCaselles[i][j] = { valor: 0, color: "white" };
+              puntsGuanyats += 4; // +4 punts per combinació
               mergedThisPass = true;
               changed = true;
               break outerLoop;
@@ -269,32 +276,34 @@ function estabilizarBoard(estatCaselles) {
     }
 
     if (mergedThisPass) {
-      // tras merge, comprobar triada negra en la celda donde quedó el resultado:
+      // després del merge, comprovar tríada negra a la cel·la on va quedar el resultat:
       aplicarGravedad(estatCaselles);
-      // Buscamos la aparición de la triada negra alrededor de TODAS las celdas
-      // (gestionarTriadaNegraSiCorrespon actuará si corresponde)
+      // Busquem l'aparició de la tríada negra al voltant de TOTES les cel·les
+      // (gestionarTriadaNegraSiCorrespon actuarà si correspon)
       let madeBlack = false;
       for (let i = 0; i < mida; i++) {
         for (let j = 0; j < mida; j++) {
           if (gestionarTriadaNegraSiCorrespon(estatCaselles, i, j)) {
             madeBlack = true;
+            puntsGuanyats += 8; // +8 punts per fitxa negra
           }
         }
       }
       if (madeBlack) {
         changed = true;
       }
-      // aplicar gravedad después y continuar
+      // aplicar gravetat després i continuar
       aplicarGravedad(estatCaselles);
       continue;
     }
 
-    // 2) Si no hubo merges binarios, intentar triada negra generada por otras causas
+    // 2) Si no hi ha hagut merges binaris, intentar tríada negra generada per altres causes
     let madeBlack2 = false;
     for (let i = 0; i < mida; i++) {
       for (let j = 0; j < mida; j++) {
         if (gestionarTriadaNegraSiCorrespon(estatCaselles, i, j)) {
           madeBlack2 = true;
+          puntsGuanyats += 8; // +8 punts per fitxa negra
         }
       }
     }
@@ -304,17 +313,41 @@ function estabilizarBoard(estatCaselles) {
       continue;
     }
 
-    // 3) Eliminar tríos iguales (todas las ocurrencias en un barrido)
-    const eliminated = eliminarTriosIguales(estatCaselles);
-    if (eliminated) {
+    // 3) Eliminar trios iguals (totes les ocurrències en un escombrat)
+    const resultatEliminacio = eliminarTriosIguales(estatCaselles);
+    if (resultatEliminacio.fitxesEliminades > 0) {
       changed = true;
-      // tras eliminar, aplicar gravedad y repetir
+      // Diferenciar entre colors primaris i secundaris
+      const colorsPrimaris = ["cyan", "magenta", "yellow"];
+      const colorsSecundaris = ["green", "darkblue", "red"];
+      
+      if (colorsPrimaris.includes(resultatEliminacio.colorEliminat)) {
+        puntsGuanyats -= 3; // -3 punts per colors primaris
+      } else if (colorsSecundaris.includes(resultatEliminacio.colorEliminat)) {
+        puntsGuanyats -= 10; // -10 punts per colors secundaris
+      }
+      
+      // després d'eliminar, aplicar gravetat i repetir
       aplicarGravedad(estatCaselles);
       continue;
     }
 
-    // Si llegamos aquí -> nada más que hacer
+    // Si arribem aquí -> no hi ha res més a fer
   } // while changed
+  
+  return puntsGuanyats;
+}
+
+// Comprova si el tauler està completament ple
+function taulerPle(estatCaselles) {
+  for (let i = 0; i < estatCaselles.length; i++) {
+    for (let j = 0; j < estatCaselles[i].length; j++) {
+      if (estatCaselles[i][j].valor === 0) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 function renderContent() {
@@ -327,6 +360,13 @@ function renderContent() {
   <button type="button" class="seleccio-grandaria" id="boto-entrada-49" value="7">7 x 7</button>
   <button type="button" class="inici" id="boto-inici">Inici</button>
   </div>
+  <div id="puntuacio-container" style="text-align: center; margin: 1em; display: none;">
+    <h2 style="color: white;">Puntuació: <span id="puntuacio">0</span></h2>
+  </div>
+  <div id="game-over-container" style="text-align: center; margin: 1em; display: none;">
+    <h2 style="color: red;">Fi de partida!</h2>
+    <button type="button" class="btn btn-primary" id="boto-reiniciar">Tornar a jugar</button>
+  </div>
   `;
 
   const colocarMida = document.createElement("div");
@@ -338,8 +378,13 @@ function renderContent() {
   contenidorTauler.id = "contenidor-tauler";
 
   let estatCaselles;
+  let puntuacio = 0;
+  let jocActiu = false;
 
   const botoInici = contenidorContent.querySelector("#boto-inici");
+  const puntuacioDisplay = contenidorContent.querySelector("#puntuacio");
+  const puntuacioContainer = contenidorContent.querySelector("#puntuacio-container");
+  const gameOverContainer = contenidorContent.querySelector("#game-over-container");
 
   //SELECCIONEM LA MIDA DEL TAULER
   botonsMida.forEach((e) => {
@@ -347,6 +392,10 @@ function renderContent() {
       botoInici.disabled = false;
       const mida = parseInt(e.value);
       estatCaselles = construirArrayTauler(mida);
+      puntuacio = 0;
+      puntuacioDisplay.textContent = puntuacio;
+      puntuacioContainer.style.display = "none";
+      gameOverContainer.style.display = "none";
 
       let filesHtml = crearTauler(mida, estatCaselles);
 
@@ -358,20 +407,47 @@ function renderContent() {
     });
   });
 
+  // Efectes de colors aleatoris per als botons de mida
+  const primaryColors = ["#0d6efd", "#dc3545", "#198754", "#ffc107", "#6610f2"];
+  botonsMida.forEach((boto) => {
+    boto.addEventListener("mouseenter", () => {
+      const randomColor = primaryColors[Math.floor(Math.random() * primaryColors.length)];
+      boto.style.backgroundColor = randomColor;
+    });
+
+    boto.addEventListener("mouseleave", () => {
+      boto.style.backgroundColor = "#0d6efd";
+    });
+  });
+
   const colors = ["magenta", "cyan", "yellow"];
 
   botoInici.addEventListener("click", () => {
     if (!estatCaselles) return;
 
     botoInici.disabled = true;
+    puntuacio = 0;
+    puntuacioDisplay.textContent = puntuacio;
+    puntuacioContainer.style.display = "block";
+    gameOverContainer.style.display = "none";
+    jocActiu = true;
     const mida = estatCaselles.length;
 
     function generarFitxaNova() {
-      // comprobar si la fila 0 está libre en alguna columna; si no, terminar (game over simple)
+      if (!jocActiu) return;
+      
+      // Comprovar si el tauler està completament ple
+      if (taulerPle(estatCaselles)) {
+        jocActiu = false;
+        gameOverContainer.style.display = "block";
+        return;
+      }
+      
+      // comprovar si la fila 0 està lliure en alguna columna; si no, terminar (game over)
       const ocupadaFila0 = estatCaselles[0].every(c => c.valor !== 0);
       if (ocupadaFila0) {
-        // simple stop: no se puede generar
-        console.warn("Game over: fila superior llena");
+        jocActiu = false;
+        gameOverContainer.style.display = "block";
         return;
       }
 
@@ -427,20 +503,43 @@ function renderContent() {
           return;
         }
 
-        // Si no puede bajar => se asienta aqui (filaActual)
+        // Si no pot baixar => s'assenta aquí (filaActual)
         clearInterval(intervalId);
         document.removeEventListener("keydown", moureFitxa);
 
-        // Al asentarse, ejecutamos el proceso de merges/eliminaciones/cascadas
-        estabilizarBoard(estatCaselles);
+        // En assentar-se, executem el procés de merges/eliminacions/cascades
+        const puntsGuanyats = estabilizarBoard(estatCaselles);
+        puntuacio += puntsGuanyats;
+        puntuacioDisplay.textContent = puntuacio;
         actualitzarTauler(contenidorTauler, estatCaselles);
 
-        // Generar nueva ficha tras pequeño delay
+        // Generar nova fitxa després d'un petit retard
         setTimeout(generarFitxaNova, 250);
       }, 500);
     }
 
     generarFitxaNova();
+  });
+
+  // Botó de reiniciar
+  const botoReiniciar = contenidorContent.querySelector("#boto-reiniciar");
+  botoReiniciar.addEventListener("click", () => {
+    if (!estatCaselles) return;
+    
+    // Reiniciar l'estat del joc
+    const mida = estatCaselles.length;
+    estatCaselles = construirArrayTauler(mida);
+    puntuacio = 0;
+    puntuacioDisplay.textContent = puntuacio;
+    jocActiu = true;
+    gameOverContainer.style.display = "none";
+    puntuacioContainer.style.display = "block";
+    
+    // Actualitzar el tauler visualment
+    actualitzarTauler(contenidorTauler, estatCaselles);
+    
+    // Començar el joc de nou
+    botoInici.click();
   });
 
   contenidorContent.append(contenidorTauler);

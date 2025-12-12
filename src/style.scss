@@ -5,14 +5,26 @@ body{
 }
 
 .celda {
-
   display: flex;
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   align-content: center;
   justify-content: center;
+  align-items: center;
   box-sizing: border-box;
+  border: none;
+  font-weight: bold;
+  font-size: 0; // Ocultar els números
+  color: transparent; // Fer els números transparents
+  transition: background-color 0.3s ease;
+  border-radius: 8px;
+  margin: 2px;
+  
+  &[style*="background-color: white"] {
+    background-color: #f8f9fa !important;
+  }
 }
+
 .files-tauler {
   display: flex;
 }
@@ -20,7 +32,47 @@ body{
 .seleccio-grandaria {
   box-sizing: border-box;
   display: flex;
+  margin: 0.5em;
+  padding: 0.5em 1em;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background-color: #0b5ed7;
+  }
+  
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
 }
+
+.inici {
+  box-sizing: border-box;
+  display: flex;
+  margin: 0.5em;
+  padding: 0.5em 1em;
+  background-color: #198754;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background-color: #157347;
+  }
+  
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+}
+
 #contenidor-tauler {
   display: flex;
   align-items: center;
@@ -28,10 +80,38 @@ body{
   margin: 1em;
 }
 
+#tauler {
+  border: 3px solid #444;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #2c3034;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
 #seleccio-mida-tauler {
   display: flex;
   align-content: center;
   justify-content: center;
   margin: 1em;
+}
+
+#puntuacio-container {
+  h2 {
+    font-size: 2em;
+    font-weight: bold;
+    
+    span {
+      color: #ffc107;
+    }
+  }
+}
+
+#game-over-container {
+  h2 {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 1em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
 }
 
