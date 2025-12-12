@@ -116,11 +116,11 @@ function eliminarTriosIguales(estatCaselles) {
     floodFill(fila, col + 1, color, grup);
   }
 
-  // Buscar tots els grups
+  // Buscar tots els grups (excloent les fitxes negres que són permanents)
   for (let i = 0; i < mida; i++) {
     for (let j = 0; j < mida; j++) {
       const cell = estatCaselles[i][j];
-      if (cell.valor !== 0 && cell.color !== "white" && !visitat[i][j]) {
+      if (cell.valor !== 0 && cell.color !== "white" && cell.color !== "black" && !visitat[i][j]) {
         const grup = [];
         floodFill(i, j, cell.color, grup);
         if (grup.length >= 3) {
@@ -436,16 +436,30 @@ function renderContent() {
     function generarFitxaNova() {
       if (!jocActiu) return;
       
-      // Comprovar si el tauler està completament ple
-      if (taulerPle(estatCaselles)) {
+      // Comprovar si alguna columna està completament plena (game over)
+      let columnaPlena = false;
+      for (let col = 0; col < estatCaselles[0].length; col++) {
+        let plena = true;
+        for (let fila = 0; fila < estatCaselles.length; fila++) {
+          if (estatCaselles[fila][col].valor === 0) {
+            plena = false;
+            break;
+          }
+        }
+        if (plena) {
+          columnaPlena = true;
+          break;
+        }
+      }
+      
+      if (columnaPlena) {
         jocActiu = false;
         gameOverContainer.style.display = "block";
         return;
       }
       
-      // comprovar si la fila 0 està lliure en alguna columna; si no, terminar (game over)
-      const ocupadaFila0 = estatCaselles[0].every(c => c.valor !== 0);
-      if (ocupadaFila0) {
+      // Comprovar si el tauler està completament ple
+      if (taulerPle(estatCaselles)) {
         jocActiu = false;
         gameOverContainer.style.display = "block";
         return;
