@@ -2,10 +2,9 @@ import "./style.scss";
 
 import { router } from "./router";
 
-import * as bootstrap from "bootstrap";
 import { renderNav } from "./components/header";
-import { renderFooter } from "./components/footer";
 import { renderContent } from "./components/content";
+import "./webcomponents/footer-component";
 
 document.addEventListener("DOMContentLoaded", () => {
   const navContainer = document.querySelector("#nav");
@@ -20,7 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const footerContainer = document.querySelector("#footer");
   if (footerContainer) {
-    footerContainer.append(renderFooter());
+    const footerComponent = document.createElement('footer-component');
+    footerContainer.append(footerComponent);
   }
 
     router(window.location.hash, mainContainer);

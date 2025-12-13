@@ -1,5 +1,6 @@
-
 export { renderRegistre }
+
+import { register } from "../services/supaservice";
 
 function renderRegistre() {
   const text = `<section class="vh-100" style="background-color: #c7c7c7ff;">
@@ -13,37 +14,41 @@ function renderRegistre() {
 
                 <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Registre</p>
 
-                <form class="mx-1 mx-md-4">
+                <form id="form-registre" class="mx-1 mx-md-4">
 
                   <div class="d-flex flex-row align-items-center mb-4">
                     <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
                     <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                      <label class="form-label" for="form3Example3c">Email</label>
-                      <input type="email" id="form3Example3c" class="form-control" style="border: 1px solid;" placeholder="Email"/>
+                      <label class="form-label" for="registre-email">Email</label>
+                      <input type="email" id="registre-email" name="email" class="form-control" style="border: 1px solid;" placeholder="Email" required/>
                     </div>
                   </div>
 
                   <div class="d-flex flex-row align-items-center mb-4">
                     <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
                     <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                      <label class="form-label" for="form3Example3c">Contrasenya</label>
-                      <input type="password" id="form3Example4c" class="form-control" style="border: 1px solid;" placeholder="Contrasenya"/>
-
+                      <label class="form-label" for="registre-password">Contrasenya</label>
+                      <input type="password" id="registre-password" name="password" class="form-control" style="border: 1px solid;" placeholder="Contrasenya (mínim 6 caràcters)" required minlength="6"/>
                     </div>
                   </div>
+                  
+                  <div id="missatge-registre" style="display: none; margin-bottom: 1rem;"></div>
+                  
                   <br>
                   <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
-                    <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg">Registre</button>
+                    <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg">Registre</button>
+                  </div>
+                  
+                  <div class="text-center">
+                    <p class="mb-0">Ja tens compte? <a href="#login" class="text-primary fw-bold">Inicia sessió</a></p>
                   </div>
 
                 </form>
 
               </div>
               <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
-
                 <img src="https://aprendercine.b-cdn.net/wp-content/uploads/2018/08/colores-primarios-y-secundarios-aprendercine.jpg"
-                  class="img-fluid" alt="Sample image">
-
+                  class="img-fluid" alt="Colors primaris i secundaris">
               </div>
             </div>
           </div>
@@ -53,35 +58,45 @@ function renderRegistre() {
   </div>
 </section>`;
 
-//boto
-const SUPABASE_KEY = "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrbWhtaGhhaXN1cWp6YmxhdWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5MDg5NDksImV4cCI6MjA3NjQ4NDk0OX0.fyHk2DNUelf5D2Wu7CAvHafyGkHmy1oC9towPO9b3mI"
-  const signupBtn = document.querySelector("#signupBtn");
-  signupBtn.addEventListener("click", async () => {
-    let signUpObject = {
-      email: document.querySelector("#signupEmail").value.trim(),
-      password: document.querySelector("#signupPwd").value.trim(),
-    };
-
-    console.log(signUpObject.email);
-    console.log(signUpObject.pwd);
-    let response = await fetch(
-      "https://ikmhmhhaisuqjzblauiu.supabase.co/auth/v1/signup",
-      {
-        method: "post",
-        headers: {
-          apiKey: SUPABASE_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(signUpObject),
-      }
-    );
-    let data = await response.json();
-    document.querySelector("#userInfo").innerHTML = JSON.stringify(data);
-    // let access_token = data.access_token;
-    // console.log(access_token);
-  });
-  //! conexion login y registro supabase END
-  const div = document.createElement('div')
+  const div = document.createElement('div');
   div.innerHTML = text;
+  
+  // Afegir event listener al formulari
+  const form = div.querySelector("#form-registre");
+  const missatgeDiv = div.querySelector("#missatge-registre");
+  
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    
+    const formData = new FormData(form);
+    const dataRegistre = Object.fromEntries(formData);
+    
+    // Mostrar missatge de càrrega
+    missatgeDiv.style.display = "block";
+    missatgeDiv.className = "alert alert-info";
+    missatgeDiv.textContent = "Registrant usuari...";
+    
+    try {
+      await register(dataRegistre);
+      
+      // Mostrar missatge d'èxit
+      missatgeDiv.className = "alert alert-success";
+      missatgeDiv.textContent = "Registre completat amb èxit! Revisa el teu correu per confirmar el compte.";
+      
+      // Netejar formulari
+      form.reset();
+      
+      // Redirigir al login després de 2 segons
+      setTimeout(() => {
+        window.location.hash = "#login";
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Error en el registre:", error);
+      missatgeDiv.className = "alert alert-danger";
+      missatgeDiv.textContent = error.message || "Error en el registre. Si us plau, intenta-ho de nou.";
+    }
+  });
+  
   return div;
 }

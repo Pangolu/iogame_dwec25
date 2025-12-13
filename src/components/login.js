@@ -1,11 +1,10 @@
 export { renderLogin };
 
-import { login, register } from "../services/supaservice";
+import { login } from "../services/supaservice";
 
-const renderLogin = (method) => () => {
+function renderLogin() {
   const text = `
-   <h1>${method === 'login' ? 'Login' : 'Register'}</h1>
-<section class="vh-100 gradient-custom" style="background-image: url(https://miro.medium.com/v2/1*3l_gNnYqeGpwNUoQEYGM9w.jpeg);">
+<section class="vh-100 gradient-custom" style="background-image: url(https://miro.medium.com/v2/1*3l_gNnYqeGpwNUoQEYGM9w.jpeg); background-size: cover; background-position: center;">
   <div class="container py-5 h-100" >
     <div class="row d-flex justify-content-center align-items-center h-100">
       <div class="col-12 col-md-8 col-lg-6 col-xl-5" >
@@ -15,26 +14,28 @@ const renderLogin = (method) => () => {
             <div class="mb-md-5 mt-md-4 pb-5">
 
               <h2 class="fw-bold mb-2 text-uppercase">Inicia sessió</h2>
-              <br>
-              <div data-mdb-input-init class="form-outline form-white mb-4">
-                <label class="form-label" for="typeEmailX">Email</label>
-                <input type="email" id="typeEmailX" class="form-control form-control-lg"/>
-              </div>
+              <p class="text-white-50 mb-5">Si us plau, introdueix el teu email i contrasenya</p>
 
-              <div data-mdb-input-init class="form-outline form-white mb-4">
-                <label class="form-label" for="typePasswordX">Contrasenya</label>
-                <input type="password" id="typePasswordX" class="form-control form-control-lg"/>
-              </div>
+              <form id="form-login">
+                <div data-mdb-input-init class="form-outline form-white mb-4">
+                  <label class="form-label" for="login-email">Email</label>
+                  <input type="email" id="login-email" name="email" class="form-control form-control-lg" required/>
+                </div>
 
-              <p class="small mb-5 pb-lg-2"><a class="text-white-50" href="#!">Has oblidat la teua contrasenya?</a></p>
+                <div data-mdb-input-init class="form-outline form-white mb-4">
+                  <label class="form-label" for="login-password">Contrasenya</label>
+                  <input type="password" id="login-password" name="password" class="form-control form-control-lg" required minlength="6"/>
+                </div>
 
-              <button id="submit-login" data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="submit">${method === 'login' ? 'Login' : 'Register'}</button>
+                <div id="missatge-login" style="display: none; margin-bottom: 1rem;"></div>
+
+                <button id="submit-login" data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" type="submit">Iniciar sessió</button>
+              </form>
 
             </div>
 
             <div>
-              <p class="mb-0">No tens compte? <a href="#registre" class="text-white-50 fw-bold">Registra't</a>
-              </p>
+              <p class="mb-0">No tens compte? <a href="#registre" class="text-white-50 fw-bold">Registra't</a></p>
             </div>
 
           </div>
@@ -43,53 +44,45 @@ const renderLogin = (method) => () => {
     </div>
   </div>
 </section>`;
-// ! conexion login y registro supabase START
-  // const SUPABASE_KEY =
-  //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrbWhtaGhhaXN1cWp6YmxhdWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5MDg5NDksImV4cCI6MjA3NjQ4NDk0OX0.fyHk2DNUelf5D2Wu7CAvHafyGkHmy1oC9towPO9b3mI";
-  // const loginBtn = document.querySelector("#loginBtn");
-  // loginBtn.addEventListener("click", async () => {
-  //   let signUpObject = {
-  //     email: document.querySelector("#userEmail").value.trim(),
-  //     password: document.querySelector("#userPwd").value.trim(),
-  //   };
 
-  //   console.log(signUpObject.email);
-  //   console.log(signUpObject.pwd);
-  //   let response = await fetch(
-  //     "https://ikmhmhhaisuqjzblauiu.supabase.co/auth/v1/token?grant_type=password",
-  //     {
-  //       method: "post",
-  //       headers: {
-  //         apiKey: SUPABASE_KEY,
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(signUpObject),
-  //     }
-  //   );
-  //   let data = await response.json();
-  //   document.querySelector("#userInfo").innerHTML = JSON.stringify(
-  //     data.user.user_metadata
-  //   );
-  //   let access_token = data.access_token;
-  //   console.log(access_token);
-  // });
   const divLogin = document.createElement("div");
-  divLogin.classList.add("container", "w-25", "vh-100");
   divLogin.innerHTML = text;
 
-  const form = divLogin.querySelector("form");
-  form.addEventListener("submit", (event) => {
+  const form = divLogin.querySelector("#form-login");
+  const missatgeDiv = divLogin.querySelector("#missatge-login");
+
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    
     const formData = new FormData(form);
     const dataLogin = Object.fromEntries(formData);
-    if (method === "login") {
-      login(dataLogin);
-    } else {
-      register(dataLogin);
+    
+    // Mostrar missatge de càrrega
+    missatgeDiv.style.display = "block";
+    missatgeDiv.className = "alert alert-info";
+    missatgeDiv.textContent = "Iniciant sessió...";
+    
+    try {
+      await login(dataLogin);
+      
+      // Mostrar missatge d'èxit
+      missatgeDiv.className = "alert alert-success";
+      missatgeDiv.textContent = "Sessió iniciada amb èxit! Redirigint...";
+      
+      // Netejar formulari
+      form.reset();
+      
+      // Redirigir al joc després d'1 segon
+      setTimeout(() => {
+        window.location.hash = "#game";
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error en el login:", error);
+      missatgeDiv.className = "alert alert-danger";
+      missatgeDiv.textContent = error.msg || error.message || "Error en iniciar sessió. Comprova les credencials.";
     }
-    form.reset();
   });
-
 
   return divLogin;
 }

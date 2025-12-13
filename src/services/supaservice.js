@@ -87,8 +87,6 @@ const getData = async (table, query) => {
 }
 
 const updateData = async (table, id, data) => {
-    console.log(table, id, data);
-
     const result = await fetchSupabase(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
         method: "PATCH",
         headers: headerFactory({ Prefer: "return=representation" }),

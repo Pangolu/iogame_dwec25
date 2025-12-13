@@ -1,6 +1,5 @@
 export { renderContent };
 
-//CONSTRUIM L'ARRAY
 function construirArrayTauler(numero) {
   const arrayTauler = [];
   for (let i = 0; i < numero; i++) {
@@ -16,7 +15,6 @@ function construirArrayTauler(numero) {
   return arrayTauler;
 }
 
-//CREEM EL TAULER PER POSAR-LO AL DOM
 function crearTauler(mida, arrayCaselles) {
   let filesHtml = "";
   for (let i = 0; i < mida; i++) {
@@ -49,7 +47,6 @@ function actualitzarTauler(contenidor, arrayCaselles) {
   contenidor.innerHTML = `<div id="tauler">${filesHtml}</div>`;
 }
 
-// 🔥 Combinaciones de colores primarios → secundarios
 function combinarColors(c1, c2) {
   const combinacions = {
     "cyan-yellow": "green",
@@ -62,19 +59,16 @@ function combinarColors(c1, c2) {
   return combinacions[`${c1}-${c2}`] || null;
 }
 
-// Comprueba si una celda está asentada (no puede bajar más)
 function estaAsentada(estatCaselles, fila, col) {
   const mida = estatCaselles.length;
   if (fila === mida - 1) return true;
   return estatCaselles[fila + 1][col].valor !== 0;
 }
 
-// Aplica gravedad en todo el tablero: las fichas caen hasta apoyarse
 function aplicarGravedad(estatCaselles) {
   const mida = estatCaselles.length;
   for (let col = 0; col < mida; col++) {
-    // Para cada columna, empezamos por abajo y arrastramos fichas hacia abajo
-    let writeRow = mida - 1; // posición donde escribimos la próxima ficha no-blanca
+    let writeRow = mida - 1;
     for (let readRow = mida - 1; readRow >= 0; readRow--) {
       if (estatCaselles[readRow][col].valor !== 0) {
         if (writeRow !== readRow) {
@@ -84,22 +78,17 @@ function aplicarGravedad(estatCaselles) {
         writeRow--;
       }
     }
-    // las filas por encima de writeRow ya están en blanco
     for (let r = writeRow; r >= 0; r--) {
       estatCaselles[r][col] = { valor: 0, color: "white" };
     }
   }
 }
 
-// Detecció i eliminació de grups de 3 o més fitxes del mateix color que es toquen.
-// Utilitza un algoritme de flood-fill per trobar grups connectats.
-// Retorna un objecte amb {fitxesEliminades, colorEliminat}
 function eliminarTriosIguales(estatCaselles) {
   const mida = estatCaselles.length;
   const visitat = Array.from({ length: mida }, () => Array(mida).fill(false));
   const grups = [];
 
-  // Trobar tots els grups connectats del mateix color
   function floodFill(fila, col, color, grup) {
     if (fila < 0 || fila >= mida || col < 0 || col >= mida) return;
     if (visitat[fila][col]) return;
@@ -109,14 +98,12 @@ function eliminarTriosIguales(estatCaselles) {
     visitat[fila][col] = true;
     grup.push({ fila, col });
 
-    // Comprovar les 4 direccions (dalt, baix, esquerra, dreta)
     floodFill(fila - 1, col, color, grup);
     floodFill(fila + 1, col, color, grup);
     floodFill(fila, col - 1, color, grup);
     floodFill(fila, col + 1, color, grup);
   }
 
-  // Buscar tots els grups (excloent les fitxes negres que són permanents)
   for (let i = 0; i < mida; i++) {
     for (let j = 0; j < mida; j++) {
       const cell = estatCaselles[i][j];
@@ -132,12 +119,11 @@ function eliminarTriosIguales(estatCaselles) {
 
   if (grups.length === 0) return { fitxesEliminades: 0, colorEliminat: null };
 
-  // Eliminar els grups trobats
   let totalFitxesEliminades = 0;
   let colorEliminat = null;
   
   for (const grup of grups) {
-    colorEliminat = grup.color; // Guardem el color eliminat per calcular punts
+    colorEliminat = grup.color;
     for (const { fila, col } of grup.fitxes) {
       estatCaselles[fila][col] = { valor: 0, color: "white" };
       totalFitxesEliminades++;
@@ -147,22 +133,17 @@ function eliminarTriosIguales(estatCaselles) {
   return { fitxesEliminades: totalFitxesEliminades, colorEliminat };
 }
 
-// Gestionar tríada negra específica (violet + green + red).
-// Comprueba si en horizontal o vertical en torno a (fila,col) están violet, green y red (en cualquier orden).
-// Si se cumple, deja la casilla central negra y elimina las otras dos (devuelve true si hizo algo).
 function gestionarTriadaNegraSiCorrespon(estatCaselles, fila, col) {
   const mida = estatCaselles.length;
   const requerida = ["darkblue", "green", "red"];
 
-  // helper para comprobar array de 3 colores
   function esTriada(arr) {
     if (arr.some(c => !c || c === "white")) return false;
     const set = new Set(arr);
-    if (set.size !== 3) return false; // deben ser los tres distintos
+    if (set.size !== 3) return false;
     return arr.every(c => requerida.includes(c));
   }
 
-  // horizontal: [col-1, col, col+1]
   if (col - 1 >= 0 && col + 1 < mida) {
     const arr = [
       estatCaselles[fila][col - 1].color,
@@ -170,7 +151,6 @@ function gestionarTriadaNegraSiCorrespon(estatCaselles, fila, col) {
       estatCaselles[fila][col + 1].color
     ];
     if (esTriada(arr)) {
-      // central a negro, las otras dos eliminadas
       estatCaselles[fila][col] = { valor: 1, color: "black" };
       estatCaselles[fila][col - 1] = { valor: 0, color: "white" };
       estatCaselles[fila][col + 1] = { valor: 0, color: "white" };
@@ -178,7 +158,6 @@ function gestionarTriadaNegraSiCorrespon(estatCaselles, fila, col) {
     }
   }
 
-  // vertical: [fila-1, fila, fila+1]
   if (fila - 1 >= 0 && fila + 1 < mida) {
     const arr = [
       estatCaselles[fila - 1][col].color,
@@ -196,13 +175,6 @@ function gestionarTriadaNegraSiCorrespon(estatCaselles, fila, col) {
   return false;
 }
 
-// Executa cascada de fusions i eliminacions fins estabilitzar:
-// - Intentar merges binaris (primaris diferents → secundari) entre cel·les assentades
-//   (horitzontal i vertical) respectant la posició de la "primera" fitxa.
-// - Després, intentar formar la tríada negra en posicions centrals afectades.
-// - Després, eliminar trios iguals (C: les 3 desapareixen).
-// Repeteix aplicarGravedad + aquests passos fins que no passi res.
-// Retorna els punts guanyats: +4 per combinació, +8 per negra, -3 per trio eliminat
 function estabilizarBoard(estatCaselles) {
   const mida = estatCaselles.length;
   let changed = true;
@@ -211,26 +183,21 @@ function estabilizarBoard(estatCaselles) {
   while (changed) {
     changed = false;
 
-    // 1) Merges binarios entre celdas asentadas
     let mergedThisPass = false;
     outerLoop:
     for (let i = 0; i < mida; i++) {
       for (let j = 0; j < mida; j++) {
         const cell = estatCaselles[i][j];
         if (cell.valor === 0) continue;
-        // Solo consideramos merges con primarios
         const primarios = ["cyan", "magenta", "yellow"];
         if (!primarios.includes(cell.color)) continue;
-        // Solo si la celda está asentada
         if (!estaAsentada(estatCaselles, i, j)) continue;
 
-        // Vertical: [i][j] con [i+1][j] -> resultado en la posición inferior
         if (i + 1 < mida && estatCaselles[i + 1][j].valor !== 0) {
           const abajo = estatCaselles[i + 1][j];
           if (primarios.includes(abajo.color) && abajo.color !== cell.color) {
             const nuevo = combinarColors(cell.color, abajo.color);
             if (nuevo) {
-              // resultat en la posició inferior (perquè ja estava)
               estatCaselles[i + 1][j] = { valor: 1, color: nuevo };
               estatCaselles[i][j] = { valor: 0, color: "white" };
               puntsGuanyats += 4; // +4 punts per combinació
@@ -241,7 +208,6 @@ function estabilizarBoard(estatCaselles) {
           }
         }
 
-        // Horizontal derecha: [j] con [j+1]: orden [primera=current][segunda=right] => resultado en current
         if (j + 1 < mida && estatCaselles[i][j + 1].valor !== 0) {
           const right = estatCaselles[i][j + 1];
           if (primarios.includes(right.color) && right.color !== cell.color && estaAsentada(estatCaselles, i, j + 1)) {
@@ -257,7 +223,6 @@ function estabilizarBoard(estatCaselles) {
           }
         }
 
-        // Horizontal izquierda: [j-1] con [j]: orden [primera=left][segunda=current] => resultado en left
         if (j - 1 >= 0 && estatCaselles[i][j - 1].valor !== 0) {
           const left = estatCaselles[i][j - 1];
           if (primarios.includes(left.color) && left.color !== cell.color && estaAsentada(estatCaselles, i, j - 1)) {
@@ -276,10 +241,7 @@ function estabilizarBoard(estatCaselles) {
     }
 
     if (mergedThisPass) {
-      // després del merge, comprovar tríada negra a la cel·la on va quedar el resultat:
       aplicarGravedad(estatCaselles);
-      // Busquem l'aparició de la tríada negra al voltant de TOTES les cel·les
-      // (gestionarTriadaNegraSiCorrespon actuarà si correspon)
       let madeBlack = false;
       for (let i = 0; i < mida; i++) {
         for (let j = 0; j < mida; j++) {
@@ -292,12 +254,10 @@ function estabilizarBoard(estatCaselles) {
       if (madeBlack) {
         changed = true;
       }
-      // aplicar gravetat després i continuar
       aplicarGravedad(estatCaselles);
       continue;
     }
 
-    // 2) Si no hi ha hagut merges binaris, intentar tríada negra generada per altres causes
     let madeBlack2 = false;
     for (let i = 0; i < mida; i++) {
       for (let j = 0; j < mida; j++) {
@@ -313,11 +273,9 @@ function estabilizarBoard(estatCaselles) {
       continue;
     }
 
-    // 3) Eliminar trios iguals (totes les ocurrències en un escombrat)
     const resultatEliminacio = eliminarTriosIguales(estatCaselles);
     if (resultatEliminacio.fitxesEliminades > 0) {
       changed = true;
-      // Diferenciar entre colors primaris i secundaris
       const colorsPrimaris = ["cyan", "magenta", "yellow"];
       const colorsSecundaris = ["green", "darkblue", "red"];
       
@@ -327,18 +285,15 @@ function estabilizarBoard(estatCaselles) {
         puntsGuanyats -= 10; // -10 punts per colors secundaris
       }
       
-      // després d'eliminar, aplicar gravetat i repetir
+
       aplicarGravedad(estatCaselles);
       continue;
     }
-
-    // Si arribem aquí -> no hi ha res més a fer
-  } // while changed
+  }
   
   return puntsGuanyats;
 }
 
-// Comprova si el tauler està completament ple
 function taulerPle(estatCaselles) {
   for (let i = 0; i < estatCaselles.length; i++) {
     for (let j = 0; j < estatCaselles[i].length; j++) {
@@ -386,7 +341,6 @@ function renderContent() {
   const puntuacioContainer = contenidorContent.querySelector("#puntuacio-container");
   const gameOverContainer = contenidorContent.querySelector("#game-over-container");
 
-  //SELECCIONEM LA MIDA DEL TAULER
   botonsMida.forEach((e) => {
     e.addEventListener("click", () => {
       botoInici.disabled = false;
@@ -436,7 +390,6 @@ function renderContent() {
     function generarFitxaNova() {
       if (!jocActiu) return;
       
-      // Comprovar si alguna columna està completament plena (game over)
       let columnaPlena = false;
       for (let col = 0; col < estatCaselles[0].length; col++) {
         let plena = true;
@@ -458,7 +411,6 @@ function renderContent() {
         return;
       }
       
-      // Comprovar si el tauler està completament ple
       if (taulerPle(estatCaselles)) {
         jocActiu = false;
         gameOverContainer.style.display = "block";
@@ -466,7 +418,6 @@ function renderContent() {
       }
 
       let columna = Math.floor(Math.random() * estatCaselles[0].length);
-      // si la columna elegida está ocupada en fila 0, buscar otra
       let attempts = 0;
       while (estatCaselles[0][columna].valor !== 0 && attempts < estatCaselles[0].length) {
         columna = (columna + 1) % estatCaselles[0].length;
@@ -483,9 +434,7 @@ function renderContent() {
 
       actualitzarTauler(contenidorTauler, estatCaselles);
 
-      // Handler de movimiento; lo declaramos para poder quitarlo más tarde
       function moureFitxa(e) {
-        // sólo permitir movimiento horizontal si todavía puede caer (no está asentada)
         if (filaActual === mida - 1 || estatCaselles[filaActual + 1][columna].valor !== 0) {
           return;
         }
@@ -549,7 +498,6 @@ function renderContent() {
     gameOverContainer.style.display = "none";
     puntuacioContainer.style.display = "block";
     
-    // Actualitzar el tauler visualment
     actualitzarTauler(contenidorTauler, estatCaselles);
     
     // Començar el joc de nou
