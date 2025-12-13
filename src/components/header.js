@@ -23,7 +23,7 @@ export function renderNav() {
         </li>
       ` : `
         <li class="nav-item mx-3">
-          <span class="nav-link text-white" style="cursor: default;">👤 ${usuariEmail}</span>
+          <span class="nav-link text-white" style="cursor: default;">${usuariEmail}</span>
         </li>
         <li class="nav-item mx-3">
           <a class="nav-link text-white" href="#" id="boto-logout">Tancar Sessió</a>
