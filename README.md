@@ -26,22 +26,6 @@ Joc de trencaclosques amb colors primaris/secundaris, gravetat i cascades, const
 npm install
 ```
 
-Configura Supabase en `src/env.js`:
-
-```js
-export const SUPABASE_KEY = "sb_publishable_xxx";
-export const SUPABASE_URL = "https://<el-teu-projecte>.supabase.co";
-```
-
-## Ordres (scripts)
-
-- `npm run dev`: servidor de desenvolupament (Vite)
-- `npm run build`: build de producció
-- `npm run preview`: previsualització de la build
-- `npm run lint`: lint amb ESLint
-- `npm test`: proves amb Vitest
-- `npm run coverage`: proves amb cobertura
-
 ## Estructura de carpetes
 
 ```
@@ -77,7 +61,7 @@ src/
 - En assentar-se, s’avalua:
 	- Combinacions binàries de primaris → secundaris (verd, blau fosc, roig)
 	- Tríada negra (cian+magenta+groc) → fitxa negra (permanent)
-	- Eliminació de grups de 3+ fitxes iguals connectades
++	- Eliminació de grups de 3+ fitxes iguals connectades
 - El joc acaba si alguna columna s’ompli completament
 
 ### Puntuació
