@@ -11,7 +11,7 @@ const getBearer = () => {
     return bearer;
 }
 
-const headerFactory = ({  // Parameter destructuring amb valors per defecte
+const headerFactory = ({ 
     apikey = SUPABASE_KEY,
     Authorization = getBearer(),
     contentType = "application/json",

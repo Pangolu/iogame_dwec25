@@ -3,7 +3,6 @@ import "./style.scss";
 import { router } from "./router";
 
 import { renderNav } from "./components/header";
-import { renderContent } from "./components/content";
 import "./webcomponents/footer-component";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,9 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const mainContainer = document.querySelector("#app");
-  if (mainContainer) {
-    mainContainer.append(renderContent());
-  }
 
   const footerContainer = document.querySelector("#footer");
   if (footerContainer) {

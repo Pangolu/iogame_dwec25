@@ -57,7 +57,6 @@ function renderLogin() {
     const formData = new FormData(form);
     const dataLogin = Object.fromEntries(formData);
     
-    // Mostrar missatge de càrrega
     missatgeDiv.style.display = "block";
     missatgeDiv.className = "alert alert-info";
     missatgeDiv.textContent = "Iniciant sessió...";
@@ -65,14 +64,11 @@ function renderLogin() {
     try {
       await login(dataLogin);
       
-      // Mostrar missatge d'èxit
       missatgeDiv.className = "alert alert-success";
       missatgeDiv.textContent = "Sessió iniciada amb èxit! Redirigint...";
       
-      // Netejar formulari
       form.reset();
       
-      // Redirigir al joc després d'1 segon
       setTimeout(() => {
         window.location.hash = "#game";
       }, 1000);

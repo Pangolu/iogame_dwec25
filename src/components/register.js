@@ -71,7 +71,6 @@ function renderRegistre() {
     const formData = new FormData(form);
     const dataRegistre = Object.fromEntries(formData);
     
-    // Mostrar missatge de càrrega
     missatgeDiv.style.display = "block";
     missatgeDiv.className = "alert alert-info";
     missatgeDiv.textContent = "Registrant usuari...";
@@ -79,14 +78,11 @@ function renderRegistre() {
     try {
       await register(dataRegistre);
       
-      // Mostrar missatge d'èxit
       missatgeDiv.className = "alert alert-success";
       missatgeDiv.textContent = "Registre completat amb èxit! Revisa el teu correu per confirmar el compte.";
       
-      // Netejar formulari
       form.reset();
       
-      // Redirigir al login després de 2 segons
       setTimeout(() => {
         window.location.hash = "#login";
       }, 2000);

@@ -361,7 +361,6 @@ function renderContent() {
     });
   });
 
-  // Efectes de colors aleatoris per als botons de mida
   const primaryColors = ["#0d6efd", "#dc3545", "#198754", "#ffc107", "#6610f2"];
   botonsMida.forEach((boto) => {
     boto.addEventListener("mouseenter", () => {
@@ -426,7 +425,6 @@ function renderContent() {
       const colorAleatori = colors[Math.floor(Math.random() * colors.length)];
       let filaActual = 0;
 
-      // Colocamos temporalmente la ficha en la fila 0
       estatCaselles[0][columna] = {
         valor: 1,
         color: colorAleatori
@@ -466,17 +464,14 @@ function renderContent() {
           return;
         }
 
-        // Si no pot baixar => s'assenta aquí (filaActual)
         clearInterval(intervalId);
         document.removeEventListener("keydown", moureFitxa);
 
-        // En assentar-se, executem el procés de merges/eliminacions/cascades
         const puntsGuanyats = estabilizarBoard(estatCaselles);
         puntuacio += puntsGuanyats;
         puntuacioDisplay.textContent = puntuacio;
         actualitzarTauler(contenidorTauler, estatCaselles);
 
-        // Generar nova fitxa després d'un petit retard
         setTimeout(generarFitxaNova, 250);
       }, 500);
     }
@@ -484,12 +479,10 @@ function renderContent() {
     generarFitxaNova();
   });
 
-  // Botó de reiniciar
   const botoReiniciar = contenidorContent.querySelector("#boto-reiniciar");
   botoReiniciar.addEventListener("click", () => {
     if (!estatCaselles) return;
     
-    // Reiniciar l'estat del joc
     const mida = estatCaselles.length;
     estatCaselles = construirArrayTauler(mida);
     puntuacio = 0;
@@ -500,7 +493,6 @@ function renderContent() {
     
     actualitzarTauler(contenidorTauler, estatCaselles);
     
-    // Començar el joc de nou
     botoInici.click();
   });
 
